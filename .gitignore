@@ -1,0 +1,14 @@
+*.tar.gz
+*.*~
+*~
+
+# History files
+.Rhistory
+.Rapp.history
+
+# RStudio files
+*.Rproj
+.Rproj.user
+
+
+
