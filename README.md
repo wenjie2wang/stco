@@ -17,7 +17,7 @@ In terminal:
 bash updateNote.sh
 ``` 
 
-Note that it would not download the notes if there is no
+Note that it would not download the notes if there was no
 updated version available.
 
 
