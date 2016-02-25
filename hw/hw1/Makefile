@@ -1,5 +1,3 @@
-
-
 render:
 	Rscript -e "if(! require(rmarkdown)) install.packages('rmarkdown');" \
 	-e "f <- list.files(pattern = '*\\\.Rmd', )" \
