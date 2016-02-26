@@ -1,4 +1,4 @@
-# Compile
+# Notes
 
 Generally speaking, homework exercise is written in *RMarkdown*.
 To compile the source document you may use Rstudio or simply call

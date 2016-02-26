@@ -197,7 +197,7 @@ On the contrary, `lmQr` runs slower when a sparse matrix class object
 is input, which means those existing methods for `dgCMatrix` fail to
 take advantage of the sparsity after QR decomposition.
 (Currently, there is no `backsolve` or similar function in package **Matrix**.
-Package `SparseM` provides method `backsolve` for different class objects.)
+Package **SparseM** provides method `backsolve` for different class objects.)
 
 
 
