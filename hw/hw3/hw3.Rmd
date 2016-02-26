@@ -30,7 +30,7 @@ ipak <- function (pkg) {
 }
 
 ## install packages needed
-needpack <- c("ggplot2", "knitr", "Matrix", "microbenchmark")
+needpack <- c("ggplot2", "kfigr", "knitr", "Matrix", "microbenchmark")
 ipak(needpack)
 knitr::opts_chunk$set(dev = 'pdf')
 knitr::opts_chunk$set(comment = NA)
@@ -39,29 +39,37 @@ knitr::opts_chunk$set(comment = NA)
 ## source code
 
 ## remedy for set-up of cross-reference index of figures and tables
-noprint <- function (x) {
-  invisible(x)
-}
+noprint <- function (x) invisible(x)
 ## usage: `r noprint(figr("chunkname", TRUE, type = "Figure"))`
 
 ```
 
-# Function `lmQr` and `lmChol`
+# Exercise: Linear Model with Sparse Model Matrix
 
-The function `lmQr` is designed using QR decomposition on design matrix
-`X` to fit linear regression model. It takes response vector `Y` and design
-matrix `X`, which can be sparse matrices object in `dgCMatrix` class
-produced by pacakge **Matrix**.
-And it returns `coefficients` for estimated
-coefficients, `stderr` for standard error of the estimates, and `df.residuals`
-for the degrees of freedom of the residuals. 
-The function `lmChol` is similarly designed but using Cholesky decomposition.
+Write **R** functions for linear regression with two inputs, model matrix `x`
+and response vector `y`. One function `lmQr` uses the QR decomposition of $x$
+and other `lmChol` uses the Cholesky decomposition of $x'x$. Each function
+returns a list with three components: `coefficients` for estimated regression
+coefficients; `stderr` for standard error of the estimates; and `df.residuals`
+for the degrees of freedom of the residuals. Compare the performance with
+`lm.fit` from **R** for both dense matrix and sparse matrix of `x` with various
+dimensions and sparsity.
 
-The straightforward implementation is done completely in R.
-Note that for `lmQr` and `lmChol`, the design matrix `X` input can be
-either dense matrix class object or sparse matrix class object, such as
-`dgCMatrix` class object. The corresponding method will be called depending
-on the object class.
+
+## Function `lmQr` and `lmChol`
+
+The function `lmQr` is designed using QR decomposition on design matrix `X` to
+fit linear regression model. It takes response vector `Y` and design matrix `X`,
+which can be sparse matrices object in `dgCMatrix` class produced by pacakge
+**Matrix**.  And it returns `coefficients` for estimated coefficients, `stderr`
+for standard error of the estimates, and `df.residuals` for the degrees of
+freedom of the residuals.  The function `lmChol` is similarly designed but using
+Cholesky decomposition.
+
+The straightforward implementation is done completely in R.  Note that for
+`lmQr` and `lmChol`, the design matrix `X` input can be either dense matrix
+class object or sparse matrix class object, `dgCMatrix` class object. The
+corresponding method will be called depending on the object class.
 
 ```{r lmQr, echo = TRUE, cache = TRUE}
 library(Matrix)
@@ -96,13 +104,13 @@ lmChol <- function (X, y) {
 ```
 
 
-# Performance Comparison on Simulated Datasets
+## Performance Comparison on Simulated Datasets
 
 We generate simulated datasets from linear regression model with various
-dimension and sparsity. Then we compare the performance between `lm.fit`
-and `lmQr` on those datasets.
+dimension and sparsity. Then we compare the performance of `lm.fit`,
+`lmQr`, and `lmChol` on those datasets, respectively.
 
-## Dense matrix of small dimension 
+### Dense matrix of small dimension 
 
 The response `Y` is set as a vector with length 500.
 The design matrix is a 500 by 10 matrix.
@@ -118,13 +126,14 @@ X <- matrix(rnorm(n * p), n)
 y <- rowSums(X) + rnorm(n)
 library(microbenchmark)
 ggplot2::autoplot(microbenchmark(lm.fit(X, y), lmQr(X, y),
-                                 lmChol(X, y), times = 100))
+                                 lmChol(X, y), times = 1000))
 ```
 
-From the comparison, we find that `lmChol` is the fastest one.
+From the comparison shown in `r figr("simuDat1", TRUE, type = "Figure")`,
+we find that `lmChol` is the fastest one.
 `lm.fit` is a little bit slower than `lmChol` but faster than `lmQr`.
 
-## Sparse matrix of small dimension 
+### Sparse matrix of small dimension 
 
 The sparsity is set to be 0.9.
 
@@ -133,10 +142,11 @@ r <- 0.9
 X[sample(n * p, floor(n * p * r))] <- 0
 Xsp <- methods::as(X, "dgCMatrix")
 ggplot2::autoplot(microbenchmark(lm.fit(X, y), lmQr(X, y), lmQr(Xsp, y),
-                                 lmChol(X, y), lmChol(Xsp, y), times = 10))
+                                 lmChol(X, y), lmChol(Xsp, y), times = 100))
 ```
 
-From the comparison, we find that `lmChol` on dense matrix objects is still the
+From the comparison shown in `r figr("simuDat2", TRUE, type = "Figure")`,
+we find that `lmChol` on dense matrix objects is still the
 fastest one. `lm.fit` is a little bit slower than `lmChol` but faster than `lmQr`
 on dense matrix objects. Both `lmChol` and `lmQr` run much slower when the object
 input is a sparse matrix class object instead of a dense matrix object.
@@ -144,11 +154,12 @@ It indicates that sparse matrix objects and their corresponding methods cannot
 bring much help when the dimension of the sparse matrix is relatively small.
 
 
-## Dense matrix of large dimension 
+### Dense matrix of large dimension 
 
 The response `Y` is set as a vector with length 500.
 The design matrix is a 5,000 by 200 matrix.
-Similarly, the performance comparison is shown as follows:
+Similarly, the performance comparison is shown in
+`r figr("simuDat3", TRUE, type = "Figure")`
 
 ```{r simuDat3, echo = TRUE, cache = TRUE, fig.cap="Performance comparison when design matrix is a dense matrix of large dimension"}
 set.seed(1216)
@@ -157,14 +168,14 @@ p <- 2e2
 X <- matrix(rnorm(n * p), n)
 y <- rowSums(X) + rnorm(n)
 ggplot2::autoplot(microbenchmark(lm.fit(X, y), lmQr(X, y),
-                                 lmChol(X, y), times = 10))
+                                 lmChol(X, y), times = 100))
 ```
 
 When a dense design matrix of large dimension is given, `lmChol` is still
 the fastest one. `lm.fit` is a little bit slower than
 `lmChol` but faster than `lmQr`.
 
-## Sparse matrix of large dimension 
+### Sparse matrix of large dimension 
 
 The sparsity is set to be 0.9.
 
@@ -173,17 +184,20 @@ r <- 0.9
 X[sample(n * p, floor(n * p * r))] <- 0
 Xsp <- methods::as(X, "dgCMatrix")
 ggplot2::autoplot(microbenchmark(lm.fit(X, y), lmQr(X, y), lmQr(Xsp, y),
-                                 lmChol(X, y), lmChol(Xsp, y), times = 10))
+                                 lmChol(X, y), lmChol(Xsp, y), times = 100))
 ```
 
-From the comparison, we find that `lmChol` on sparse matrix objects becomes the
-fastest one. `lmChol` becomes slower when a dense matrix object is specified.
-`lm.fit` is slower than `lmChol` but faster than `lmQr`.
-One interesting finding is that `lmQr` runs faster when a sparse matrix object
-is input instead of a dense matrix object, which is reasonable since
-the dimension of the sparse design matrix is much higher than the previous case.
-The benefit of using sparse matrix class object to deal with sparse matrices
-become more obvious when dimension and sparsity goes larger.
+From the comparison shown in `r figr("simuDat4", TRUE, type = "Figure")`, we
+find that `lmChol` on sparse matrix objects becomes the fastest one. `lmChol`
+becomes much slower when a dense matrix object is specified, which means that
+the sparse matrix class object and its methods take advantage of the sparsity of
+the matrix and the advantage grows larger when the dimension grows.
+What's more, `lm.fit` is slower than `lmChol` but faster than `lmQr`.
+On the contrary, `lmQr` runs slower when a sparse matrix class object
+is input, which means those existing methods for `dgCMatrix` fail to
+take advantage of the sparsity after QR decomposition.
+(Currently, there is no `backsolve` or similar function in package **Matrix**.
+Package `SparseM` provides method `backsolve` for different class objects.)
 
 
 
