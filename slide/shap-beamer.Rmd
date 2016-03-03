@@ -16,6 +16,7 @@ output:
         fig_height: 4
         fig_caption: true
         slide_level: 2
+        keep_tex: true
 ---
 
 
@@ -338,7 +339,7 @@ function estimation.
 - When shape assumptions can be combined with smoothness,
 we may get the best of both worlds.
 
-- Shape-restricted regression splines are great combination of
+- Shape-restricted regression splines are a great combination of
 smoothness and shape assumption.
 
 - Source document of this slide is available at
@@ -348,5 +349,7 @@ smoothness and shape assumption.
 # Reference 
 
 ## Reference {.allowframebreaks}
+
+## 
 
 
