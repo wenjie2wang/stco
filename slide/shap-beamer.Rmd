@@ -1,0 +1,352 @@
+---
+title: "Introduction to Shape-Restricted Regression Splines"
+author: |
+    | Wenjie Wang
+date: "03 March 2016"
+header-includes:
+    - \usepackage{booktabs}
+    - \usepackage{bm}
+    - \widowpenalties 1 150
+bibliography: shap.bib
+output: 
+    beamer_presentation:
+        theme: "Singapore"
+        toc: true
+        fig_width: 7
+        fig_height: 4
+        fig_caption: true
+        slide_level: 2
+---
+
+
+```{r setup, echo = FALSE, warning = FALSE, message = FALSE}
+## function ipak: install and load multiple R packages.
+## check to see if packages are installed.
+## install them if they are not, then attach them to the search path.
+ipak <- function (pkg) {
+    new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+    if (length(new.pkg))
+        install.packages(new.pkg, dependencies = TRUE)
+    sapply(pkg, require, character.only = TRUE, quietly = TRUE)
+    invisible(NULL)
+}
+
+## install packages needed
+needpack <- c("ggplot2", "kfigr", "knitr", "coneproj", "ConSpline")
+ipak(needpack)
+knitr::opts_chunk$set(dev = 'pdf')
+knitr::opts_chunk$set(comment = NA)
+
+## load data and clean
+## from http://matt-wand.utsacademics.info/webspr/
+incomeDat <- read.table("age.income.txt", header = TRUE,
+                        col.names = c("age", "logIncome"))
+incomeDat <- incomeDat[order(incomeDat$age), ]
+onionDat <- read.table("onions.txt", header = TRUE)
+onionDat$logY <- log(onionDat$yield)
+onionDat <- onionDat[order(onionDat$dens), ]
+
+## source code
+
+## remedy for set-up of cross-reference index of figures and tables
+noprint <- function (x) {
+  invisible(x)
+}
+## usage: `r noprint(figr("chunkname", TRUE, type = "Figure"))`
+
+```
+
+# Introduction
+
+## Introduction
+
+- Let's consider the regression model 
+$$ 
+y_i = f(x_i) + \sigma\epsilon_i, ~i = 1, 2, \ldots, n,
+$$
+where the errors $\epsilon_i,~i=1,\ldots,n$, are i.i.d. 
+
+- When a parametric form for $f$ is not avaiable, nonparametric 
+methods provide estimates for $f$ only assuming some sort of smoothness.
+
+- Three of most popular methods require a choice of user-specified paramaters 
+
+    - Kernal smoother: bandwidth
+	- Smoothing spline: smoothing parameter
+	- Regression splines: number and placement of knots
+
+- If the fits are sensitive to these choices, inference about the regression
+function will be problematic. 
+
+## Shape-Restricted Regression
+
+- Monotonic regression
+    - A Closed-form solution was provided by @brunk1955maxi.
+	- Pool adjacent violators algorithm (PAVA)
+	- Estimator is a step function.
+
+- Convex (concave) regression
+    - Convex least square estimates proposed by @hildreth1954poin.
+	- @hanson1976cons proved their consistency.
+	- Finding least-squares estimator is a quadratic programming problem.
+	- Estimator is a piecewise linear function.
+
+- The fits do not require user-specified parameters. However,
+neither is satisfactory if $f$ is known to be smooth.
+
+
+## Motivating Examples 
+
+- Example 1: Age and income 
+    - The relationship between log(income) and age
+	of 205 Canadian workers is to be modeled nonparametrically.
+    - It is believed that the true relationship between
+	log(income) and age should be concave without any dip.
+
+- Example 2: Onion data
+
+    - When onions are planted more densely, the yield per plant
+	is expected to decrease.
+	- The log(yield) is supposed to be convex in the density of the
+	planting.
+
+- The example datasets are both from @ruppert2003semi.
+
+----
+
+```{r incomeDat, echo = FALSE, cache = TRUE, fig.cap = "Age--income data (left panel) and onion data (right panel) fitted by smoothing splines with different smoothing parameters."}
+## smoothing splines for example 1
+sFit11 <- with(incomeDat, smooth.spline(age, logIncome))
+sFit12 <- with(incomeDat, smooth.spline(age, logIncome, spar = 0.4))
+sFit13 <- with(incomeDat, smooth.spline(age, logIncome, spar = 0.8))
+## smoothing splines for example 2
+sFit21 <- with(onionDat, smooth.spline(dens, logY))
+sFit22 <- with(onionDat, smooth.spline(dens, logY, spar = 0.9))
+sFit23 <- with(onionDat, smooth.spline(dens, logY, spar = 1.3))
+
+par(mfrow = c(1, 2), mar = c(4, 4, 0.5, 0.5))
+## plot example 1
+plot(incomeDat, cex = 0.8, xlab = "Age(years)",
+     ylab = "log(Income)", col = "gray")
+lines(sFit11)
+lines(sFit12, col = "blue", lty = 2)
+lines(sFit13, col = "red", lty = 4)
+legend("topleft", legend = c(expression(lambda==0.4),
+                             expression(lambda%~~%0.6),
+                             expression(lambda==0.8)),
+       col = c("blue", "black", "red"), lty = c(2, 1, 4), cex = 0.8)
+## plot example 2
+plot(logY ~ dens, data = onionDat, cex = 0.8,
+     xlab = "Density (plants per sqm)",
+     ylab = "log(Yield)", col = "gray")
+lines(sFit21)
+lines(sFit22, col = "blue", lty = 2)
+lines(sFit23, col = "red", lty = 4)
+legend("topright", legend = c(expression(lambda==0.9),
+                             expression(lambda%~~%1.1),
+                             expression(lambda==1.3)),
+       col = c("blue", "black", "red"), lty = c(2, 1, 4), cex = 0.8)
+```
+
+
+# Smoothness and Shape Assumption
+
+## Monotone Regression Splines
+
+- As the integrals of $M$-splines,
+the $I$-splines proposed by @ramsay1988mono are constrained
+to be monotonic.
+
+- Similar to $B$-spline, the $M$-splines can be given recursively.
+The relationship between $B$-splines and $M$-spline of order $k$
+can be shown as follows:
+$$
+B_i = (t_{i+k} - t_{i}) M_i / k,~ i = 1,2,\ldots,n.
+$$
+
+- To constrain the estimator to be monotone, the coefficients of
+the basis functions must be nonnegative (the coefficient of the
+constant function is not constrained).
+
+
+## Shape-Restricted Regression Splines
+
+- @meyer2008infe extended the method to convex restrictions using $C$-splines
+where $C$-splines are integrals of $I$-splines.
+
+- A convex regression function is estimated using linear combinations of the
+basis functions with nonnegative coefficients, plus an unrestricted linear
+combination of the constant function and the identity function $g(x) = x$.
+
+- If the underlying regression function is both increasing and convex, the
+coefficient on the identity function is restricted to be nonnegative as well.
+
+
+# Estimation Procedures
+
+## Algorithm for regression spline fitting
+
+- @ramsay1988mono provided an iterative gradient-based algorithm
+for estimating $f$ with smoothed monotone regression using $I$-splines.
+It converges in "infinitely many" steps, which means that
+the true solution is approached asymptotically and reached within a
+user-defined tolerance.
+
+- @meyer1996shape proposed the hinge algorithm
+for cone projection problem, which can be applied to estimating $f$
+under shape and smoothing assumption. In addition, it is guaranteed
+to produce the solution in a finite number of steps. 
+
+
+## Revisit: Shape Restriction Regression
+
+- Consider model in vector form:
+$$
+\bm{y} = \bm{\theta} + \sigma\bm{\epsilon},
+$$
+where $\theta_i=f(x_i)$ and $x_i$ is ordered increasingly,
+$i=1,\ldots,n$.
+
+- If $f$ is known to be increasing and convex,
+the shape restrictions are a set of linear inequality constrains:
+$$
+\theta_1 \le \theta_2 \le \ldots \le \theta_n,
+$$
+and
+$$
+\frac{\theta_2-\theta_1}{x_2-x_1} \le \frac{\theta_3-\theta_2}{x_3-x_2} \le
+\ldots \le \frac{\theta_n - \theta_{n-1}}{x_n - x_{n-1}}.
+$$
+
+## Cone Projection
+
+- The shape restrictions can be rewritten in the form $\bm{A\theta}\ge\bm{0}$.
+The constraint matrix $\bm{A}$ is $m \times n$ where $m = n-1$ for monotone
+and $m=n-2$ for convex constraints.
+
+- The estimation problem is to find $\bm{\theta}$ to minimize
+$||\bm{y}-\bm{\theta}||^2$ under constraints $\bm{A\theta}\ge\bm{0}$.
+
+- The $m$ inequality constraints form a convex polyhedral cone $\mathcal{C}$
+in $\mathcal{R}^n$ expressed as
+$$
+\mathcal{C} = \{\bm{\theta} \in \mathcal{R}^n: \bm{A\theta}\ge 0\}.
+$$
+
+- Let $\mathcal{V}$ be the null space of $\bm{A}$. Then $\mathcal{V}$ is
+contained in $\mathcal{C}$.
+
+----
+
+- @meyer1999exte showed that the cone can be alternatively written as
+$$
+\mathcal{C} = \left\{\bm{\theta}\in\mathcal{R}^n:
+\bm{\theta} = \bm{v}+\sum_{j=1}^M b_j \bm{\delta}_j,~\bm{v}\in \mathcal{V},~
+b_1,\ldots,b_M \ge 0 \right\},
+$$
+where $\bm{\delta}_1, \ldots, \bm{\delta}_M$ is the edges or generators of
+$\mathcal{C}$, $M=m$ if $\bm{A}$ has full row rank and $M\ge m$ otherwise.
+
+- In addition, the edges $\bm{\delta}_1, \ldots, \bm{\delta}_M$ are orthogonal
+to $\mathcal{V}$, so the projection of $\bm{Y}$ onto $\mathcal{C}$ is the sum of
+the projection onto $\mathcal{V}$ and onto the cone
+$$
+\Omega = \left\{\bm{\theta} \in \mathcal{R}^n: \sum_{j=1}^M b_j \bm{\delta}_j,~
+b_1,\ldots, b_M \ge 0 \right\}
+$$
+
+## The Hinge Algorithm
+
+- The hinge algorithm provides the projection onto $\Omega$ by determining the
+face of the cone on which the projection lands.
+
+- Once the face containing the projection is determined, the projection
+onto $\Omega$ is simply the projection onto the linear space spanned by
+the edges making up the face.
+
+- For more details and proofs, see @meyer1999exte and @meyer2013simp.
+
+
+## Back to Shape-Restricted Regression Splines
+
+- These ideas applied to shaped-restricted regression can be
+applied to regression splines as well.
+
+- A quadratic spline function is increasing if and only if it is increasing
+at the knots. Similarly, a cubic spline function is convex if and only if
+it is convex at the knots [@meyer2013simp].
+
+- The spline basis functions are the edges of constraint cone.
+
+# Implementation
+
+## R Package: **ConSpline** and **coneproj**
+
+- **ConSpline** provides function `conspline` fitting the partial linear model
+$$
+\bm{y} = \bm{\theta} + \bm{Z\alpha} + \bm{\epsilon},
+$$
+where $\theta_i=f(x_i),~i = 1, \ldots, n$, $\bm{Z}$ is an optional design matrix,
+$f$ is a smooth function with a user-defined shape: increasing, decreasing, convex,
+concave, or combinations of monotonicity and convexity.
+
+- **ConSpline** depends on **coneproj** [@liao2014cone].
+The latter mainly contains routines
+for cone projection and quadratic programming. 
+
+----
+
+```{r con, echo = FALSE, cache = TRUE, fig.cap = "Age--income data (left panel) and onion data (right panel) fitted by shape-restricted regression splines with different number of internal knots."}
+ezFit <- function (nKnots, y, x, shape) {
+    setKnots <- function (x, n) {
+        quantile(x, probs = seq(0, 1, length.out = n + 2))
+    }
+    conFit <- ConSpline::conspline(y, x, shape, knots = setKnots(x, nKnots))
+    data.frame(x, yHat = conFit$fhat)
+}
+## age-income data
+ageFitList <- with(incomeDat, lapply(c(3, 5, 7), ezFit,
+                                     y = logIncome, x = age, shape = 4))
+## onion data
+oniFitList <- with(onionDat, lapply(c(3, 5, 7), ezFit,
+                                    y = logY, x = dens, shape = 6))
+## plots
+cols <- c("black", "red", "blue")
+ltys <- c(1, 2, 4)
+par(mfrow = c(1, 2), mar = c(4, 4, 0.5, 0.5))
+plot(logIncome ~ age, data = incomeDat, col = "gray", cex = 0.8,
+     xlab = "Age(years)", ylab = "log(Income)")
+for (i in 1:3) lines(ageFitList[[i]], col = cols[i], lty = ltys[i])
+legend("topleft", legend = c("3", "5", "7"),
+       col = cols, lty = ltys, cex = 0.8) 
+plot(logY ~ dens, data = onionDat, col = "gray", cex = 0.8,
+     xlab = "Density (plants per sqm)", ylab = "log(Yield)")
+for (i in 1:3) lines(oniFitList[[i]], col = cols[i], lty = ltys[i])
+legend("topright", legend = c("3", "5", "7"),
+       col = cols, lty = ltys, cex = 0.8)
+```
+
+# Summary
+
+## Summary
+
+- Constrained estimation is useful for both parametric and nonparametric
+function estimation.
+
+- More constrain means less freedom, which may lead to more robust estimates.
+
+- When shape assumptions can be combined with smoothness,
+we may get the best of both worlds.
+
+- Shape-restricted regression splines are great combination of
+smoothness and shape assumption.
+
+- Source document of this slide is available at
+*[github](https://github.com/wenjie2wang/stco)*.
+
+
+# Reference 
+
+## Reference {.allowframebreaks}
+
+
