@@ -4,4 +4,4 @@ render:
 	-e "rmarkdown::render(f[1])"
 
 clean: 
-	rm -rf *_files *_cache .Rhistory *\#* *.tar.gz *~
+	rm -rf *_files *_cache .Rhistory *\#* .\#* *.tar.gz *~
