@@ -18,16 +18,16 @@ Do not hesitate to contribute if you have a better solution!
 [Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw1/hw1.Rmd))
     - Exercise: Comorbidity Measures
 
-- **Homework 2** ([pdf](http://wenjie2wang.github.io/stco/hw/hw2.pdf)
+- **Homework 2** ([pdf](http://wenjie2wang.github.io/stco/hw/hw2.pdf),
 [Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw2/hw2.Rmd))
     - Exercise: Distribution of the Max of *n* Independent Normal Variables
 	- Exercise: Linear Regression with RcppArmadillo
 
-- **Homework 3** ([pdf](http://wenjie2wang.github.io/stco/hw/hw3.pdf)
+- **Homework 3** ([pdf](http://wenjie2wang.github.io/stco/hw/hw3.pdf),
 [Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw3/hw3.Rmd))
     - Exercise: Linear Model with Sparse Model Matrix
 	
-- **Homework 4** ([pdf](http://wenjie2wang.github.io/stco/hw/hw4.pdf)
+- **Homework 4** ([pdf](http://wenjie2wang.github.io/stco/hw/hw4.pdf),
 [Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw4/hw4.Rmd))
     - Exercise: Spearman's rho for *t*-copula
 
