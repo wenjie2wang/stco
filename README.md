@@ -12,24 +12,28 @@ is (will be) pushed here for discussion and reference,
 which is designed to be as reproducible as possible.
 Do not hesitate to contribute if you have a better solution!
 
-**Currently available solutions:** 
+## Currently available solutions
 
-- [Homework 1](https://github.com/wenjie2wang/stco/tree/master/hw/hw1)
+- **Homework 1** ([pdf](http://wenjie2wang.github.io/stco/hw/hw1.pdf),
+[Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw1/hw1.Rmd))
     - Exercise: Comorbidity Measures
 
-- [Homework 2](https://github.com/wenjie2wang/stco/tree/master/hw/hw2)
+- **Homework 2** ([pdf](http://wenjie2wang.github.io/stco/hw/hw2.pdf)
+[Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw2/hw2.Rmd))
     - Exercise: Distribution of the Max of *n* Independent Normal Variables
 	- Exercise: Linear Regression with RcppArmadillo
 
-- [Homework 3](https://github.com/wenjie2wang/stco/tree/master/hw/hw3)
+- **Homework 3** ([pdf](http://wenjie2wang.github.io/stco/hw/hw3.pdf)
+[Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw3/hw3.Rmd))
     - Exercise: Linear Model with Sparse Model Matrix
 	
-- [Homework 4](https://github.com/wenjie2wang/stco/tree/master/hw/hw4)
+- **Homework 4** ([pdf](http://wenjie2wang.github.io/stco/hw/hw4.pdf)
+[Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw4/hw4.Rmd))
     - Exercise: Spearman's rho for *t*-copula
 
-**Incoming solution:**
+## Incoming solution
 
-- Homework 5
+- **Homework 5**
     - Exercise: A Simple Implementation of QIF
 
 
