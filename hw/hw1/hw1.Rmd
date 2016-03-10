@@ -1,5 +1,6 @@
 ---
-title: "STAT-6494 Advanced Statistical Computing with R -- HW 1"
+title: "STAT-6494 Advanced Statistical Computing with R"
+subtitle: "Homework 1"
 author: Wenjie Wang
 date: "`r format(Sys.time(), '%d %B %Y')`"
 header-includes:
