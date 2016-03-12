@@ -33,8 +33,8 @@ ipak <- function (pkg) {
 ## install packages needed
 needpack <- c("ggplot2", "kfigr", "knitr", "Matrix", "microbenchmark")
 ipak(needpack)
-knitr::opts_chunk$set(dev = 'pdf')
-knitr::opts_chunk$set(comment = NA)
+knitr::opts_chunk$set(comment = NA, cache = TRUE,
+                      fig.width = 7, fig.height = 5.5)
 ## load data and clean
 
 ## source code
@@ -72,7 +72,7 @@ The straightforward implementation is done completely in R.  Note that for
 class object or sparse matrix class object, `dgCMatrix` class object. The
 corresponding method will be called depending on the object class.
 
-```{r lmQr, echo = TRUE, cache = TRUE}
+```{r lmQr}
 library(Matrix)
 lmQr <- function (X, y) {
     resQR <- qr(X)
@@ -119,7 +119,7 @@ We compare the computing performance of `lmQr`, `lmChol` with `lm.fit`
 from package **stats** with the help of package **microbenchmark** over
 the simulated `Y` and `X` as follows:
 
-```{r simuDat1, echo = TRUE, cache = TRUE, fig.cap="Performance comparison when design matrix is a dense matrix of small dimension"}
+```{r simuDat1, fig.cap="Performance comparison when design matrix is a dense matrix of small dimension"}
 set.seed(1216)
 n <- 500
 p <- 10
@@ -130,7 +130,7 @@ ggplot2::autoplot(microbenchmark(lm.fit(X, y), lmQr(X, y),
                                  lmChol(X, y), times = 1000))
 ```
 
-From the comparison shown in `r figr("simuDat1", TRUE, type = "Figure")`,
+From the comparison shown in `r figr("simuDat1", TRUE, FALSE, type = "Figure")`,
 we find that `lmChol` is the fastest one.
 `lm.fit` is a little bit slower than `lmChol` but faster than `lmQr`.
 
@@ -138,7 +138,7 @@ we find that `lmChol` is the fastest one.
 
 The sparsity is set to be 0.9.
 
-```{r simuDat2, echo = TRUE, cache = TRUE, fig.cap="Performance comparison when design matrix is a sparse matrix of small dimension"}
+```{r simuDat2, fig.cap="Performance comparison when design matrix is a sparse matrix of small dimension"}
 r <- 0.9
 X[sample(n * p, floor(n * p * r))] <- 0
 Xsp <- methods::as(X, "dgCMatrix")
@@ -146,7 +146,7 @@ ggplot2::autoplot(microbenchmark(lm.fit(X, y), lmQr(X, y), lmQr(Xsp, y),
                                  lmChol(X, y), lmChol(Xsp, y), times = 100))
 ```
 
-From the comparison shown in `r figr("simuDat2", TRUE, type = "Figure")`,
+From the comparison shown in `r figr("simuDat2", TRUE, FALSE, type = "Figure")`,
 we find that `lmChol` on dense matrix objects is still the
 fastest one. `lm.fit` is a little bit slower than `lmChol` but faster than `lmQr`
 on dense matrix objects. Both `lmChol` and `lmQr` run much slower when the object
@@ -160,9 +160,9 @@ bring much help when the dimension of the sparse matrix is relatively small.
 The response `Y` is set as a vector with length 500.
 The design matrix is a 5,000 by 200 matrix.
 Similarly, the performance comparison is shown in
-`r figr("simuDat3", TRUE, type = "Figure")`
+`r figr("simuDat3", TRUE, FALSE, type = "Figure")`
 
-```{r simuDat3, echo = TRUE, cache = TRUE, fig.cap="Performance comparison when design matrix is a dense matrix of large dimension"}
+```{r simuDat3, fig.cap="Performance comparison when design matrix is a dense matrix of large dimension"}
 set.seed(1216)
 n <- 5e3
 p <- 2e2
@@ -180,7 +180,7 @@ the fastest one. `lm.fit` is a little bit slower than
 
 The sparsity is set to be 0.9.
 
-```{r simuDat4, echo = TRUE, cache = TRUE, fig.cap="Performance comparison when design matrix is a sparse matrix of small dimension"}
+```{r simuDat4, fig.cap="Performance comparison when design matrix is a sparse matrix of large dimension"}
 r <- 0.9
 X[sample(n * p, floor(n * p * r))] <- 0
 Xsp <- methods::as(X, "dgCMatrix")
@@ -188,7 +188,7 @@ ggplot2::autoplot(microbenchmark(lm.fit(X, y), lmQr(X, y), lmQr(Xsp, y),
                                  lmChol(X, y), lmChol(Xsp, y), times = 100))
 ```
 
-From the comparison shown in `r figr("simuDat4", TRUE, type = "Figure")`, we
+From the comparison shown in `r figr("simuDat4", TRUE, FALSE, type = "Figure")`, we
 find that `lmChol` on sparse matrix objects becomes the fastest one. `lmChol`
 becomes much slower when a dense matrix object is specified, which means that
 the sparse matrix class object and its methods take advantage of the sparsity of
