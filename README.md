@@ -35,10 +35,15 @@ which is designed to be as reproducible as possible.
 [Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw4/hw4.Rmd))
     - Exercise: Spearman's rho for *t*-copula
 
+- **Homework 5** ([html](http://wenjie-stat.me/stco/hw/hw5.html),
+[pdf](http://wenjie-stat.me/stco/hw/hw5.pdf),
+[Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw5/hw5.Rmd))
+    - Exercise: A Simple Implementation of QIF
+
 ## Incoming 
 
-- **Homework 5** 
-    - Exercise: A Simple Implementation of QIF
+- **Homework 6** 
+    - Exercise: Pending
 
 
 # Course Notes
