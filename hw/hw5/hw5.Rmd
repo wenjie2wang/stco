@@ -83,11 +83,11 @@ simpleQIF <- function (y, X, id, family = binomial) {
     fit0 <- glm.fit(X, y, family = famFun)
     beta0 <- fit0$coef
     ## optim step
-    res <- optim(beta0, fn = qNbeta, gr = NULL,
-                 clusSize = clusSize, clusN = clusN, y = y, X = X,
-                 matMList = matMList, famFun = famFun)
+    res <- nlm(qNbeta, beta0, clusSize = clusSize, clusN = clusN,
+               y = y, X = X, matMList = matMList, famFun = famFun,
+               stepmax = 10)
     ## simply output coef estimates
-    res$par
+    setNames(res$estimate, colnames(X))
 }
 
 ### internal functions
@@ -95,7 +95,7 @@ simpleQIF <- function (y, X, id, family = binomial) {
 g_riBeta <- function (matM, betaVec, yi, Xi, famFun) {
     eta <- as.vector(Xi %*% betaVec, mode = "numeric")
     muiVec <- famFun$linkinv(eta)
-    matDi <- famFun$mu.eta(muiVec) * Xi # element-wise
+    matDi <- famFun$mu.eta(eta) * Xi # element-wise
     sqrtInvAi <- diag(1 / sqrt(famFun$variance(muiVec)))
     crossprod(matDi, sqrtInvAi) %*% (matM %*% (sqrtInvAi %*% (yi - muiVec)))
 }
@@ -132,8 +132,7 @@ We compare the estimates of covariate coefficients produced by
 on a sample dataset, *ohio*.
 
 From the comparison, we may find that the estimates 
-by `simpleQIF` and `geese` are quite close to each other.
-So we have confidence that the implementation is correct.
+by `simpleQIF` and `geese` are fairly close to each other.
 
 ```{r comp, cache = TRUE}
 require(geepack)
