@@ -11,7 +11,7 @@
 
 <meta name="author" content="Wenjie Wang" />
 
-<meta name="date" content="2016-03-16" />
+<meta name="date" content="2016-03-19" />
 
 <title>STAT-6494 Advanced Statistical Computing with R</title>
 
@@ -112,7 +112,7 @@ $(document).ready(function () {
 <h1 class="title">STAT-6494 Advanced Statistical Computing with R</h1>
 <h3 class="subtitle"><em>Homework 5</em></h3>
 <h4 class="author"><em>Wenjie Wang</em></h4>
-<h4 class="date"><em>16 March 2016</em></h4>
+<h4 class="date"><em>19 March 2016</em></h4>
 
 </div>
 
@@ -141,11 +141,11 @@ $(document).ready(function () {
     fit0 &lt;- glm.fit(X, y, family = famFun)
     beta0 &lt;- fit0$coef
     ## optim step
-    res &lt;- optim(beta0, fn = qNbeta, gr = NULL,
-                 clusSize = clusSize, clusN = clusN, y = y, X = X,
-                 matMList = matMList, famFun = famFun)
+    res &lt;- nlm(qNbeta, beta0, clusSize = clusSize, clusN = clusN,
+               y = y, X = X, matMList = matMList, famFun = famFun,
+               stepmax = 10)
     ## simply output coef estimates
-    res$par
+    setNames(res$estimate, colnames(X))
 }
 
 ### internal functions
@@ -153,7 +153,7 @@ $(document).ready(function () {
 g_riBeta &lt;- function (matM, betaVec, yi, Xi, famFun) {
     eta &lt;- as.vector(Xi %*% betaVec, mode = &quot;numeric&quot;)
     muiVec &lt;- famFun$linkinv(eta)
-    matDi &lt;- famFun$mu.eta(muiVec) * Xi # element-wise
+    matDi &lt;- famFun$mu.eta(eta) * Xi # element-wise
     sqrtInvAi &lt;- diag(1 / sqrt(famFun$variance(muiVec)))
     crossprod(matDi, sqrtInvAi) %*% (matM %*% (sqrtInvAi %*% (yi - muiVec)))
 }
@@ -185,7 +185,7 @@ qNbeta &lt;- function (betaVec, clusSize, clusN, y, X, matMList, famFun) {
 <div id="comparison-with-geepack-on-a-sample-dataset" class="section level2">
 <h2>Comparison with <strong>geepack</strong> on a Sample Dataset</h2>
 <p>We compare the estimates of covariate coefficients produced by <code>geese</code> in <strong>geepack</strong> to verify our implementation of QIF on a sample dataset, <em>ohio</em>.</p>
-<p>From the comparison, we may find that the estimates by <code>simpleQIF</code> and <code>geese</code> are quite close to each other. So we have confidence that the implementation is correct.</p>
+<p>From the comparison, we may find that the estimates by <code>simpleQIF</code> and <code>geese</code> are fairly close to each other.</p>
 <pre class="r"><code>require(geepack)
 data(ohio)
 y &lt;- ohio$resp
@@ -193,19 +193,19 @@ X &lt;- cbind(&quot;(Intercept)&quot; = 1, ohio[, 3:4])
 id &lt;- ohio$id
 simpleQIF(y, X, id) # estimates from our implementation</code></pre>
 <pre><code>(Intercept)         age       smoke 
- -1.8844759  -0.1189905   0.2637976 </code></pre>
+ -1.8958176  -0.1157990   0.2376972 </code></pre>
 <pre class="r"><code>## compare with geepack
 fitGee &lt;- geese(resp ~ age + smoke, id = id, data = ohio, 
                 family = binomial, corstr = &quot;exch&quot;, scale.fix = TRUE)
 fitGee$beta # estimates from geepack</code></pre>
 <pre><code>(Intercept)         age       smoke 
  -1.8804288  -0.1133850   0.2650833 </code></pre>
-</div>
-</div>
-<div id="reference" class="section level1 references unnumbered">
-<h1>Reference</h1>
+<div id="references" class="references">
+<h1 id="reference" class="unnumbered">Reference</h1>
 <div id="ref-qu2000improving">
 <p>Qu, Annie, Bruce G Lindsay, and Bing Li. 2000. “Improving Generalised Estimating Equations Using Quadratic Inference Functions.” <em>Biometrika</em> 87 (4). Biometrika Trust: 823–36.</p>
+</div>
+</div>
 </div>
 </div>
 
