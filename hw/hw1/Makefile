@@ -1,11 +1,11 @@
 render2pdf:
 	Rscript -e "if(! require(rmarkdown)) install.packages('rmarkdown');" \
-	-e "f <- list.files(pattern = '*\\\.Rmd', )" \
+	-e "f <- list.files(pattern = 'hw[0-9]\\\.Rmd', )" \
 	-e "rmarkdown::render(f[1], 'pdf_document')"
 
 render2html:
 	Rscript -e "if(! require(rmarkdown)) install.packages('rmarkdown');" \
-	-e "f <- list.files(pattern = '*\\\.Rmd', )" \
+	-e "f <- list.files(pattern = 'hw[0-9]\\\.Rmd', )" \
 	-e "rmarkdown::render(f[1], 'html_document')"
 
 clean: 
