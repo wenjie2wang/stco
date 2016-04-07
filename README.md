@@ -29,7 +29,7 @@ which is designed to be as reproducible as possible.
 [pdf](http://wenjie-stat.me/stco/hw/hw3.pdf),
 [Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw3/hw3.Rmd))
     - Exercise: Linear Model with Sparse Model Matrix
-	
+
 - **Homework 4** ([html](http://wenjie-stat.me/stco/hw/hw4.html),
 [pdf](http://wenjie-stat.me/stco/hw/hw4.pdf),
 [Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw4/hw4.Rmd))
@@ -40,9 +40,12 @@ which is designed to be as reproducible as possible.
 [Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw5/hw5.Rmd))
     - Exercise: A Simple Implementation of QIF
 
-## Incoming 
+## Incoming
 
-- **Homework 6** 
+- **Homework 6**
+    - Exercise: A Poisson-HMM for Earthquake Data
+
+- **Homework 7**
     - Exercise: Pending
 
 
@@ -52,11 +55,9 @@ The course notes is rolling-updated before each class.
 Instead of manually going to the course page and downloading the notes
 every time, we may want to call a simple bash script to do the job.
 
-In terminal:
-
 ```
 bash updateNote.sh
-``` 
+```
 
 Note that it would not download the notes if there was no
 updated version available.
