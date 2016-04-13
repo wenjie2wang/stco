@@ -40,13 +40,16 @@ which is designed to be as reproducible as possible.
 [Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw5/hw5.Rmd))
     - Exercise: A Simple Implementation of QIF
 
-## Incoming
-
-- **Homework 6**
+- **Homework 6** ([html](http://wenjie-stat.me/stco/hw/hw6.html),
+[pdf](http://wenjie-stat.me/stco/hw/hw6.pdf),
+[Rmd](https://raw.githubusercontent.com/wenjie2wang/stco/master/hw/hw6/hw6.Rmd))
     - Exercise: A Poisson-HMM for Earthquake Data
 
+
+## Incoming
+
 - **Homework 7**
-    - Exercise: Pending
+    - Exercise: Estimating the Median with Bootstrap
 
 
 # Course Notes
