@@ -1,0 +1,100 @@
+---
+title: "STAT-6494 Advanced Statistical Computing with R"
+subtitle: "Homework 7"
+author: Wenjie Wang
+date: "`r format(Sys.time(), '%d %B %Y')`"
+header-includes:
+    - \usepackage{booktabs}
+    - \usepackage{bm}
+bibliography: hw7.bib
+output:
+  pdf_document:
+    fig_caption: yes
+    keep_tex: no
+    number_sections: yes
+    toc: no
+  fontsize: 11pt
+  classoption: letter
+  documentclass: article
+
+---
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+## function ipak: install and load multiple R packages.
+## check to see if packages are installed.
+## install them if they are not, then attach them to the search path.
+ipak <- function (pkg) {
+    new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+    if (length(new.pkg))
+        install.packages(new.pkg, dependencies = TRUE)
+    sapply(pkg, require, character.only = TRUE, quietly = TRUE)
+    invisible(NULL)
+}
+
+## install packages needed
+needpack <- c("knitr")
+ipak(needpack)
+knitr::opts_chunk$set(comment = ">")
+## load data and clean
+
+## source code
+
+```
+
+
+# Exercise: Estimating the Median with Bootstrap
+
+@efron1979 had an example of estimating the median Section 3. Suppose
+that $X_1,\ldots,X_n$, $n=2m-1$ from a random sample from a distribution
+$F$. Let $\theta(F)$ be the median of $F$ and $t(\bm{X})=X_{(m)}$ be
+the sample median. Having observed $\bm{X}=\bm{x}$ with $n=13$ from
+$N(0,1)$, use Monte Carlo bootstrap method to approximate the sampling
+distribution of
+$$
+R(\bm{X}, F) = \frac{|t(\bm{X}) - \theta(F)|}{\sigma(F)},
+$$
+the absolute error of the sample median relative to the population
+standard deviation.
+
+
+# Reproduction of Example Simulation Study
+
+
+The following is the function we revised from the course notes and the
+corresponding simulation results generated.
+
+
+```{r fun}
+median.boot <- function(x, nboot) {
+    tx <- median(x)
+    sx <- sd(x) / sqrt(nx <- length(x))
+    do1rep <- function(x) {
+        x.b <- sample(x, nx, replace = TRUE)
+        abs(median(x.b) - tx) / sx
+    }
+    r.sample <- replicate(nboot, do1rep(x))
+    c(mean(r.sample), sd(r.sample))
+}
+set.seed(421)
+x <- rnorm(13)
+median.boot(x, 50)
+sim <- replicate(10, median.boot(rnorm(13), 100))
+resDat <- data.frame(t(sim))
+colnames(resDat) <- c("Ave.", "S.D.")
+resDat
+## average of bootstrap estiamtes and sd estimates
+colMeans(resDat)
+## empirical sd of bootstrap estimates and sd estimates
+apply(resDat, 2, sd)
+```
+
+
+The results shown in the first column resemble the second column in Table 1 on
+page 8 in @efron1979. Therefore, the similar results to the example simulation
+study is produced successfully.  Note that the only revise we did on the
+function `median.boot` from course notes is $\sigma(F)$, the so-called
+"population standard deviation", which is introduced to help the quantity of
+interest, $R(\bm{X},F)$ be more numerically stable.
+
+
+# Reference
