@@ -10,5 +10,5 @@
 *.Rproj
 .Rproj.user
 
-
-
+# Jekyll site
+_site
