@@ -26,7 +26,7 @@ output:
 ipak <- function (pkg) {
     new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
     if (length(new.pkg))
-        install.packages(new.pkg, dependencies = TRUE)
+        install.packages(new.pkg, repos = "https://cloud.r-project.org")
     sapply(pkg, require, character.only = TRUE, quietly = TRUE)
     invisible(NULL)
 }
@@ -41,9 +41,7 @@ knitr::opts_chunk$set(comment = NA, cache = TRUE,
 ## source code
 
 ## remedy for set-up of cross-reference index of figures and tables
-noprint <- function (x) {
-  invisible(x)
-}
+noprint <- function(x) invisible(x)
 ## usage: `r noprint(figr("chunkname", TRUE, type = "Figure"))`
 
 ```
@@ -76,12 +74,12 @@ we may easily get random numbers from bivariate $t$-copula for given
 degree of freedom, df, and dispersion $r$. Then the sample Spearman
 correlation coefficient $\hat{\rho}$ is computed for each sample.
 Function `oneRho` and `rRho` are implemented to get the sample $\rho$
-at each grid point of $r$ values. 
+at each grid point of $r$ values.
 
 ```{r fun}
 library(copula)
 oneRho <- function (r, df, nSample) {
-    if (r == 0L) return(0) 
+    if (r == 0L) return(0)
     obj <- tCopula(r, dim = 2, dispstr = "ex", df = df, df.fixed = TRUE)
     sampMat <- rCopula(nSample, obj)
     cor(sampMat[, 1], sampMat[, 2], method = "spearman")
@@ -138,7 +136,7 @@ legend("bottomright", col = c("blue", "gray", "black"),
 
 The fitted spline function is plotted in
 `r figr("spline1", TRUE, FALSE, type = "Figure")`, from which we may find that
-the penalized smoothing cubic spline fits the sample Spearman's rho quite well. 
+the penalized smoothing cubic spline fits the sample Spearman's rho quite well.
 
 
 ## Part 3.
@@ -229,7 +227,7 @@ resDat <- mirFun(conFit)
 ```
 
 If we check the fitted Spearman's rho at 0 or 1 ($-1$), we will find that
-the difference between true value and fitted value is negligible. 
+the difference between true value and fitted value is negligible.
 
 \newpage
 
@@ -253,7 +251,7 @@ resDat <- mirFun(cobsFit)
 
 If we have a close check on the fitted Spearman's rho on 0 or 1 ($-1$),
 we may find that the fitted values are not exactly constrained to be the
-true values. However, the difference is negligible. 
+true values. However, the difference is negligible.
 
 \newpage
 

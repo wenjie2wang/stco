@@ -26,7 +26,7 @@ output:
 ipak <- function (pkg) {
     new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
     if (length(new.pkg))
-        install.packages(new.pkg, dependencies = TRUE)
+        install.packages(new.pkg, repos = "https://cloud.r-project.org")
     sapply(pkg, require, character.only = TRUE, quietly = TRUE)
     invisible(NULL)
 }
@@ -102,7 +102,7 @@ ggDat <- data.frame(y = do.call("c", ggList),
                                levels = n, labels = paste("n =", n)))
 (ggp <- ggplot(ggDat0, aes(x = x, y = dens)) + geom_line() +
      geom_histogram(data = ggDat, mapping = aes(x = y, y = ..density.., fill = n),
-                    inherit.aes = FALSE, alpha = 0.25, bins = 25, ) + 
+                    inherit.aes = FALSE, alpha = 0.25, bins = 25, ) +
      geom_density(data = ggDat, mapping = aes(x = y, color = n),
                   inherit.aes = FALSE) +
      ylab("Density") + xlab(expression(Y[n])) +
@@ -125,11 +125,11 @@ the degrees of freedom of the residuals. Compare the performance with function
 ## Function `armaLm`
 
 The function `armaLm` is slightly revised from an example given
-by @eddelbuettel2013 and implemented with the help of R package **inline** 
+by @eddelbuettel2013 and implemented with the help of R package **inline**
 fitting linear regression model. It takes design
 matrix `X`, response vector `Y`, and returns `coefficients` for estimated
 coefficients, `stderr` for standard error of the estimates, and `df.residuals`
-for the degrees of freedom of the residuals. 
+for the degrees of freedom of the residuals.
 
 
 ```{r armaLm, echo = TRUE, cache = TRUE}
@@ -166,9 +166,9 @@ The response `Y` is set as a vector with length 100,000.
 The design matrix is a 100,000 by 10 matrix.
 
 ```{r simuDat, echo = TRUE, cache = TRUE}
-## generate simulation data 
+## generate simulation data
 betaVec <- c(0.5, 1, 2, 0.8, 1.2, 2.3, 0.6, 1.5, 0.9) # true beta
-p <- length(betaVec) 
+p <- length(betaVec)
 sigMat <- matrix(0.1, ncol = p - 1, nrow = p - 1) +
     diag(0.9, nrow = p - 1, ncol = p - 1)
 set.seed(1216)

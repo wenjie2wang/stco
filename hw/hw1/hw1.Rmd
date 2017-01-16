@@ -25,7 +25,7 @@ output:
 ipak <- function (pkg) {
     new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
     if (length(new.pkg))
-        install.packages(new.pkg, dependencies = TRUE)
+        install.packages(new.pkg, repos = "https://cloud.r-project.org")
     sapply(pkg, require, character.only = TRUE, quietly = TRUE)
     invisible(NULL)
 }
@@ -36,8 +36,8 @@ ipak(needpack)
 
 ## install package "comorbidities"
 if (! require(comorbidities)) {
-    download.file(paste("https://cran.r-project.org/src/contrib/Archive/",
-                        "comorbidities/comorbidities_1.0.tar.gz", sep = ""),
+    download.file(paste0("https://cran.r-project.org/src/contrib/Archive/",
+                         "comorbidities/comorbidities_1.0.tar.gz"),
                   destfile = "comorbidities_1.0.tar.gz", quiet = TRUE)
     install.packages("comorbidities_1.0.tar.gz", repos = NULL)
 }
@@ -113,7 +113,7 @@ codeFun <- function () {
         indVec3 <- numMat >= 42400 & numMat <= 42499
         indVec4 <- numMat >= 74630 & numMat <= 74660
         indVec5 <- numMat %in% c(324220, 324330, 39790)
-        indMat <- indVec1 | indVec2 | indVec3 | indVec4 | indVec5 
+        indMat <- indVec1 | indVec2 | indVec3 | indVec4 | indVec5
         dim(indMat) <- dim(numMat)
         as.integer(rowSums(indMat, na.rm = TRUE) > 0)
     }

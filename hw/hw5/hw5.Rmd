@@ -26,7 +26,7 @@ output:
 ipak <- function (pkg) {
     new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
     if (length(new.pkg))
-        install.packages(new.pkg, dependencies = TRUE)
+        install.packages(new.pkg, repos = "https://cloud.r-project.org")
     sapply(pkg, require, character.only = TRUE, quietly = TRUE)
     invisible(NULL)
 }
@@ -34,7 +34,6 @@ ipak <- function (pkg) {
 ## install packages needed
 needpack <- c("knitr", "geepack")
 ipak(needpack)
-knitr::opts_chunk$set(dev = 'pdf')
 knitr::opts_chunk$set(comment = NA)
 ## load data and clean
 

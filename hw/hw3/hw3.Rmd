@@ -22,10 +22,10 @@ output:
 ## function ipak: install and load multiple R packages.
 ## check to see if packages are installed.
 ## install them if they are not, then attach them to the search path.
-ipak <- function (pkg) {
+ipak <- function(pkg) {
     new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
     if (length(new.pkg))
-        install.packages(new.pkg, dependencies = TRUE)
+        install.packages(new.pkg, repos = "https://cloud.r-project.org")
     sapply(pkg, require, character.only = TRUE, quietly = TRUE)
     invisible(NULL)
 }
@@ -35,12 +35,13 @@ needpack <- c("ggplot2", "kfigr", "knitr", "Matrix", "microbenchmark")
 ipak(needpack)
 knitr::opts_chunk$set(comment = NA, cache = TRUE,
                       fig.width = 7, fig.height = 5.5)
+options(digits = 3)
 ## load data and clean
 
 ## source code
 
 ## remedy for set-up of cross-reference index of figures and tables
-noprint <- function (x) invisible(x)
+noprint <- function(x) invisible(x)
 ## usage: `r noprint(figr("chunkname", TRUE, type = "Figure"))`
 
 ```
@@ -74,7 +75,7 @@ corresponding method will be called depending on the object class.
 
 ```{r lmQr}
 library(Matrix)
-lmQr <- function (X, y) {
+lmQr <- function(X, y) {
     resQR <- qr(X)
     betaEst <- qr.coef(resQR, y)
     df <- nrow(X) - (Xp <- ncol(X))
@@ -91,7 +92,7 @@ lmQr <- function (X, y) {
     list(coefficients = betaEst, stderr = stderr,
          df.residuals = df)
 }
-lmChol <- function (X, y) {
+lmChol <- function(X, y) {
     resChol <- chol(crossprod(X))
     RHS <- crossprod(X, y)
     xtxInv <- chol2inv(resChol)
@@ -111,7 +112,7 @@ We generate simulated datasets from linear regression model with various
 dimension and sparsity. Then we compare the performance of `lm.fit`,
 `lmQr`, and `lmChol` on those datasets, respectively.
 
-### Dense matrix of small dimension 
+### Dense matrix of small dimension
 
 The response `Y` is set as a vector with length 500.
 The design matrix is a 500 by 10 matrix.
@@ -126,15 +127,16 @@ p <- 10
 X <- matrix(rnorm(n * p), n)
 y <- rowSums(X) + rnorm(n)
 library(microbenchmark)
-ggplot2::autoplot(microbenchmark(lm.fit(X, y), lmQr(X, y),
-                                 lmChol(X, y), times = 1000))
+(ans <- microbenchmark(lm.fit(X, y), lmQr(X, y),
+                       lmChol(X, y), times = 1000))
+ggplot2::autoplot(ans)
 ```
 
 From the comparison shown in `r figr("simuDat1", TRUE, FALSE, type = "Figure")`,
 we find that `lmChol` is the fastest one.
 `lm.fit` is a little bit slower than `lmChol` but faster than `lmQr`.
 
-### Sparse matrix of small dimension 
+### Sparse matrix of small dimension
 
 The sparsity is set to be 0.9.
 
@@ -142,8 +144,9 @@ The sparsity is set to be 0.9.
 r <- 0.9
 X[sample(n * p, floor(n * p * r))] <- 0
 Xsp <- methods::as(X, "dgCMatrix")
-ggplot2::autoplot(microbenchmark(lm.fit(X, y), lmQr(X, y), lmQr(Xsp, y),
-                                 lmChol(X, y), lmChol(Xsp, y), times = 100))
+(ans <- microbenchmark(lm.fit(X, y), lmQr(X, y), lmQr(Xsp, y),
+                       lmChol(X, y), lmChol(Xsp, y), times = 100))
+ggplot2::autoplot(ans)
 ```
 
 From the comparison shown in `r figr("simuDat2", TRUE, FALSE, type = "Figure")`,
@@ -155,7 +158,7 @@ It indicates that sparse matrix objects and their corresponding methods cannot
 bring much help when the dimension of the sparse matrix is relatively small.
 
 
-### Dense matrix of large dimension 
+### Dense matrix of large dimension
 
 The response `Y` is set as a vector with length 500.
 The design matrix is a 5,000 by 200 matrix.
@@ -168,15 +171,15 @@ n <- 5e3
 p <- 2e2
 X <- matrix(rnorm(n * p), n)
 y <- rowSums(X) + rnorm(n)
-ggplot2::autoplot(microbenchmark(lm.fit(X, y), lmQr(X, y),
-                                 lmChol(X, y), times = 100))
+(ans <- microbenchmark(lm.fit(X, y), lmQr(X, y), lmChol(X, y), times = 100))
+ggplot2::autoplot(ans)
 ```
 
 When a dense design matrix of large dimension is given, `lmChol` is still
 the fastest one. `lm.fit` is a little bit slower than
 `lmChol` but faster than `lmQr`.
 
-### Sparse matrix of large dimension 
+### Sparse matrix of large dimension
 
 The sparsity is set to be 0.9.
 
@@ -184,8 +187,9 @@ The sparsity is set to be 0.9.
 r <- 0.9
 X[sample(n * p, floor(n * p * r))] <- 0
 Xsp <- methods::as(X, "dgCMatrix")
-ggplot2::autoplot(microbenchmark(lm.fit(X, y), lmQr(X, y), lmQr(Xsp, y),
-                                 lmChol(X, y), lmChol(Xsp, y), times = 100))
+(ans <- microbenchmark(lm.fit(X, y), lmQr(X, y), lmQr(Xsp, y),
+                       lmChol(X, y), lmChol(Xsp, y), times = 100))
+ggplot2::autoplot(ans)
 ```
 
 From the comparison shown in `r figr("simuDat4", TRUE, FALSE, type = "Figure")`, we
@@ -199,6 +203,3 @@ is input, which means those existing methods for `dgCMatrix` fail to
 take advantage of the sparsity after QR decomposition.
 (Currently, there is no `backsolve` or similar function in package **Matrix**.
 Package **SparseM** provides method `backsolve` for different class objects.)
-
-
-
