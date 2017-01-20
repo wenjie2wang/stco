@@ -86,7 +86,7 @@ rMaxNorm <- function (n = 2, N = 1e4, mu = 0, sd = 1) {
 By using the function `rMaxNorm` defined in last section, we are able to get
 $N=10,000$ simulated observations with $n\in\{2,3,4,5,10,100\}$, respectively.
 Then, the overlaid histogram and density plots can be plotted by **ggplot2**
-as follows. The output plot is shown in `r figr("plots", TRUE, FALSE, type = "Figure")`.
+as follows. The output plot is shown in `r figr("ggp", TRUE, FALSE, type = "Figure")`.
 
 ```{r ggp, warning=FALSE, fig.cap = "Overlaid histogram and density plots."}
 library(ggplot2)
