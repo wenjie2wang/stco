@@ -9,13 +9,13 @@ all: $(pdf) $(html)
 	@echo "compiling $? to pdf..."
 	Rscript -e "if(! require(rmarkdown)) install.packages('rmarkdown');"\
 		-e "rmarkdown::render('$?', 'pdf_document')"
-	@echo "$@ is generated.\n"
+	@echo -e "$@ is generated.\n"
 
 %.html: %.Rmd
 	@echo "compiling $? to html..."
 	Rscript -e "if(! require(rmarkdown)) install.packages('rmarkdown');"\
 		-e "rmarkdown::render('$?', 'html_document')"
-	@echo "$@ is generated.\n"
+	@echo -e "$@ is generated.\n"
 
 
 .PHONY: clean
