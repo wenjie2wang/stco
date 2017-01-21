@@ -1,0 +1,44 @@
+---
+title: "Homework Solution to STAT 6496 (Spring 2016)"
+subtitle: "Advanced Statistical Computing with R"
+author: Wenjie Wang
+date: "`r format(Sys.time(), '%d %B %Y')`"
+bibliography: hw.bib
+---
+
+
+```{r global-settings, echo=FALSE, message=FALSE, warning=FALSE}
+## function ipak: install and load multiple R packages.
+## check to see if packages are installed.
+## install them if they are not, then attach them to the search path.
+ipak <- function (pkg) {
+    new.pkg <- pkg[! (pkg %in% installed.packages()[, "Package"])]
+    if (length(new.pkg))
+        install.packages(new.pkg, repos = "https://cloud.r-project.org")
+    sapply(pkg, require, character.only = TRUE, quietly = TRUE)
+    invisible(NULL)
+}
+## install packages needed
+needpack <- c("ggplot2", "MASS", "Matrix", "inline", "microbenchmark", "copula",
+              "cobs", "geepack")
+ipak(needpack)
+## knitr::opts_chunk$set(dev = 'pdf')
+
+
+## install package "comorbidities"
+if (! require(comorbidities)) {
+    download.file(paste0("https://cran.r-project.org/src/contrib/Archive/",
+                         "comorbidities/comorbidities_1.0.tar.gz"),
+                  destfile = "comorbidities_1.0.tar.gz", quiet = TRUE)
+    install.packages("comorbidities_1.0.tar.gz", repos = NULL)
+}
+
+
+knitr::opts_chunk$set(cache = TRUE, fig.width = 7, fig.height = 5.5)
+options(digits = 3)
+```
+
+
+# Introduction {-}
+
+It is a pratice document for **bookdown**.

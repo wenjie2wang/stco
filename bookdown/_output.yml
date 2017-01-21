@@ -1,0 +1,21 @@
+bookdown::pdf_book:
+  includes:
+    in_header: preamble.tex
+  latex_engine: pdflatex
+  citation_package: natbib
+  keep_tex: yes
+  pandoc_args: --top-level-division=chapter
+  toc_depth: 3
+  toc_unnumbered: no
+# bookdown::gitbook:
+#   css: style.css
+#   config:
+#     toc:
+#       before: |
+#         <li><a href="./">Sample Homework Solution</a></li>
+#       after: |
+#         <li><a href="https://wenjie-stat.me/stco" target="blank">stco</a></li>
+#     edit: https://github.com/wenjie2wang/stco/edit/master/%s
+# bookdown::pdf_document2:
+#   toc: no
+# bookdown::html_document2: default

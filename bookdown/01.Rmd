@@ -1,0 +1,104 @@
+# Exercise: Comorbidity Measures
+
+Comorbidity measures are important in health-care research. They can be obtained
+from hospital discharge records using the diagnosis coding of ICD-9-CM
+(International Classification of Diseases, Ninth Edition, Clinical Modifications).
+An influential, widely cited method was proposed by Elixhauser et
+al. (Comorbidity Measures for Use with Administrative Data. Medical Care,
+1998;36:8–27). The method has been refined by the Healthcare Cost and
+Utilization Project [HCUP](http://www.hcup-us.ahrq.gov/overview.jsp).
+Their [implementation
+](http://www.hcup-us.ahrq.gov/toolssoftware/comorbidity/comorbidity.jsp)
+is in SAS. Construction of the variables is summarized in a PDF table under the
+section "Variables Created". For simplicity, let us ignore the DRG code for this
+assignment. For real usage, one would need to consider the DRG code.  An R
+implementation is available in package
+[comorbidities](cran.r-project.org/package=comorbidities).
+We will focus on the function ahrq in this package. The input of the function is
+a data frame where rows are patients and columns are ICD-9-CM codes. Each
+patient does not necessarily have all columns filled; some ICD-9-CM codes can be
+NA or empty. The output of the functions is a list, and we are interested in the
+data frame where rows are patients and columns are comorbidity measures. This
+function can be made much more efficient by vectorizing.  Please write a
+function `cmbd`. Its input is the same as ahrq and its output is a data frame with
+only first two comorbidity measures: CHF and VALVE (again, for simplicity). We
+have a sample input of 100 patients in csv format for your testing. The function
+will be graded with another sample input randomly selected from my real data.
+Comment: For real implementation, We had to clean the data: 1) trim the leading
+and trailing spaces; 2) add zero to the end for codes with length smaller than
+5; 3) consider DRG code; and 4) automate the generation of functions.
+
+
+## Implementation: Function `cmbd`
+
+The function body of `cmbd` is shown as follows:
+
+```{r fun-01, echo = TRUE, comments = NA}
+cmbd <- function (data) {
+    mat <- as.matrix(data)
+    numMat <- gsub("^[Vv]", "32", mat)
+    numMat <- gsub("^[Ee]", "15", numMat)
+    numMat <- as.numeric(numMat)
+    dim(numMat) <- dim(mat)
+    funList <- codeFun()
+    outDat <- sapply(seq_along(funList),
+                     function (a, numMat) {
+                         funList[[a]](numMat)
+                     }, numMat = numMat)
+    colnames(outDat) <- c("CHF", "VALVE")
+    data.frame(outDat)
+}
+
+codeFun <- function () {
+    ## internal function for CHF measures
+    chf <- function (numMat) {
+        indVec1 <- numMat %in% c(39891, 40201, 40211, 40291, 40401,
+                                 40403, 40411, 40413, 40491, 40493)
+        indVec2 <- numMat >= 42800 & numMat <= 42890
+        indMat <- indVec1 | indVec2
+        dim(indMat) <- dim(numMat)
+        as.integer(rowSums(indMat, na.rm = TRUE) > 0)
+    }
+    ## internal function for VALVE measures
+    valve <- function (numMat) {
+        indVec1 <- numMat >= 9320 & numMat <= 9324
+        indVec2 <- numMat >= 39400 & numMat <= 39710
+        indVec3 <- numMat >= 42400 & numMat <= 42499
+        indVec4 <- numMat >= 74630 & numMat <= 74660
+        indVec5 <- numMat %in% c(324220, 324330, 39790)
+        indMat <- indVec1 | indVec2 | indVec3 | indVec4 | indVec5
+        dim(indMat) <- dim(numMat)
+        as.integer(rowSums(indMat, na.rm = TRUE) > 0)
+    }
+    list(chf = chf, valve = valve)
+}
+```
+
+
+## Result of Sample Dataset
+
+By using the function `cmbd` defined in last section, the diagnosed result
+for each patient by ICD9 code in sample dataset is shown as follows.
+
+```{r res, echo=TRUE, warning=FALSE}
+sampleDat <- read.csv("icd9sample.csv")
+(myRes <- cmbd(sampleDat))
+## compare the results with the one from package comorbidities
+library(comorbidities)
+pkgRes <- (ahrq(sampleDat)[[2]])[, 1:2]
+all.equal(pkgRes, myRes) # match if TRUE
+```
+
+
+## Performance
+
+Although function `cmbd` only generate the diagnosis result for CHF and VALVE,
+from the comparison of computing performance by package `microbenchmark`, we
+may find that the computing speed of `cmbd` is much faster than
+function `ahrq` in pacakge `comorbidities`.
+
+
+```{r perf-01, cache=TRUE, warning=FALSE}
+library(microbenchmark)
+microbenchmark(ahrq(sampleDat), cmbd(sampleDat), times = 5)
+```
