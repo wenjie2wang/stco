@@ -6,6 +6,9 @@ date: "`r format(Sys.time(), '%d %B %Y')`"
 header-includes:
     - \usepackage{booktabs}
 bibliography: hw2.bib
+output:
+  bookdown::pdf_document2:
+    toc: no
 ---
 
 
