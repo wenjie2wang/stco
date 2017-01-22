@@ -1,0 +1,179 @@
+---
+title: "STAT-6494 Advanced Statistical Computing with R"
+subtitle: "Homework 2"
+author: Wenjie Wang
+date: "`r format(Sys.time(), '%d %B %Y')`"
+header-includes:
+    - \usepackage{booktabs}
+bibliography: hw2.bib
+---
+
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+## function ipak: install and load multiple R packages.
+## check to see if packages are installed.
+## install them if they are not, then attach them to the search path.
+ipak <- function (pkg) {
+    new.pkg <- pkg[! (pkg %in% installed.packages()[, "Package"])]
+    if (length(new.pkg))
+        install.packages(new.pkg, repos = "https://cloud.r-project.org")
+    sapply(pkg, require, character.only = TRUE, quietly = TRUE)
+    invisible(NULL)
+}
+
+## install packages needed
+needpack <- c("ggplot2", "MASS", "inline", "microbenchmark")
+ipak(needpack)
+knitr::opts_chunk$set(cache = TRUE, fig.width = 7, fig.height = 5.5)
+## load data and clean
+
+## source code
+
+```
+
+
+# Exercise: Distribution of the Max of $n$ Independent Normal Variables
+
+In a clinical trial, there are $k$ treatment groups with different dosages and
+one control group (think about Dr. Qiqi Deng's talk). For simplicity, suppose
+that the outcome of interest is normally distributed with mean $\mu_k$ and
+$\sigma^2$. When a statistician compares the best group out of the $k$ groups
+with the control group, this is no longer a standard two-sample comparison due
+to the multiplicity issues from the $k$ groups.  Consider a random sample
+$X_1,X_2,\ldots,X_n$ from $N(\mu,\sigma^2)$. Let $Y_n=\max(X_1,\ldots,X_n)$ be
+the sample maximum. Although the exact distribution of $Y_n$ can be obtained
+analytically [@nadarajah2008;@hill2011], it is better illustrated via kernel
+density estimation with random draws from the distribution. Given $n$, $\mu$,
+and $\sigma^2$, generate a large number $N$ observations from the distribution
+of $Y_n$.  Let $\mu=0$, $\sigma=1$, and $N=10,000$.  Use **ggplot2** to draw the
+histogram of the observations with $n\in\{2,3,4,5,10,100\}$ in plot with
+$2\times3$ panels. Overlay the kernel density estimation and the density of
+$N(\mu,\sigma^2)$ in each panel.
+
+
+## Function `rMaxNorm`
+
+The simple function `rMaxNorm` shown below is to generate random numbers from the
+distribution of the minimum of $n$ independent normal distribution.
+
+```{r fun, echo = TRUE, comments = NA}
+rMaxNorm <- function (n = 2, N = 1e4, mu = 0, sd = 1) {
+    rMat <- matrix(rnorm(N * n), nrow = N, ncol = n)
+    tmpList <- lapply(seq_len(n), function (j) rMat[, j])
+    do.call("pmax", tmpList)
+}
+```
+
+## Overlaid Histogram and Density Plot by Using **ggplot2**.
+
+By using the function `rMaxNorm` defined in last section, we are able to get
+$N=10,000$ simulated observations with $n\in\{2,3,4,5,10,100\}$, respectively.
+Then, the overlaid histogram and density plots can be plotted by **ggplot2**
+as follows. The output plot is shown in Figure \@ref(fig:ggp).
+
+```{r ggp, warning=FALSE, fig.cap = "Overlaid histogram and density plots."}
+library(ggplot2)
+N = 1e4
+x <- seq(from = - 4, to = 4, length.out = N)
+dens <- dnorm(x)
+ggDat0 <- data.frame(dens = dens, x = x)
+set.seed(1216)
+n <- c(2, 3, 4, 5, 10, 100)
+ggList <- lapply(n, rMaxNorm, N = N)
+ggDat <- data.frame(y = do.call("c", ggList),
+                    n = factor(rep(n, each = N),
+                               levels = n, labels = paste("n =", n)))
+(ggp <- ggplot(ggDat0, aes(x = x, y = dens)) + geom_line() +
+     geom_histogram(data = ggDat, mapping = aes(x = y, y = ..density.., fill = n),
+                    inherit.aes = FALSE, alpha = 0.25, bins = 25, ) +
+     geom_density(data = ggDat, mapping = aes(x = y, color = n),
+                  inherit.aes = FALSE) +
+     ylab("Density") + xlab(expression(Y[n])) +
+     facet_wrap("n", nrow = 2, ncol = 3) +
+     theme_bw() + theme(legend.position = "none"))
+```
+
+
+# Exercise: Linear Regression with **RcppArmadillo**
+
+Consider the linear regression model with response vector $Y$ and design matrix
+$X$. Write a function in **C++** using the facilities available in package
+**RcppArmadillo** to do linear regression fit. The function takes two inputs `Y` and
+`X`, and outputs three components: `coefficients` for estimated regression
+coefficients; `stderr` for standard error of the estimates; and `df.residuals` for
+the degrees of freedom of the residuals. Compare the performance with function
+`lm.fit` in **R** on a simulated large dataset.
+
+
+## Function `armaLm`
+
+The function `armaLm` is slightly revised from an example given
+by @eddelbuettel2013 and implemented with the help of R package **inline**
+fitting linear regression model. It takes design
+matrix `X`, response vector `Y`, and returns `coefficients` for estimated
+coefficients, `stderr` for standard error of the estimates, and `df.residuals`
+for the degrees of freedom of the residuals.
+
+
+```{r armaLm, echo = TRUE, cache = TRUE}
+src <- '
+Rcpp::NumericMatrix Xr(Xs);
+Rcpp::NumericVector Yr(Ys);
+int n = Xr.nrow(), k = Xr.ncol();
+arma::mat X(Xr.begin(), n, k, false);
+arma::colvec Y(Yr.begin(), Yr.size(), false);
+int df = n - k;
+// fit model Y ~ X, extract residuals
+arma::colvec coef = arma::solve(X, Y);
+arma::colvec res = Y - X * coef;
+double s2 = std::inner_product(res.begin(),
+                               res.end(), res.begin(), 0.0) / df;
+// std.errors of coefficients
+arma::colvec sderr =
+  arma::sqrt(s2 * arma::diagvec(arma::pinv(arma::trans(X) * X)));
+return Rcpp::List::create(Rcpp::Named("coefficients") = coef,
+Rcpp::Named("stderr") = sderr,
+Rcpp::Named("df.residuals") = df);
+'
+
+armaLm <- inline::cxxfunction(signature(Xs = "numeric", Ys = "numeric"),
+                              body = src, plugin = "RcppArmadillo")
+```
+
+
+## Test on a Large Simulated Dataset
+
+We first generate a simulated data from linear regression model.
+Then we fit the model by `armaLm` and get the results of interest.
+The response `Y` is set as a vector with length 100,000.
+The design matrix is a 100,000 by 10 matrix.
+
+```{r simuDat, echo = TRUE, cache = TRUE}
+## generate simulation data
+betaVec <- c(0.5, 1, 2, 0.8, 1.2, 2.3, 0.6, 1.5, 0.9) # true beta
+p <- length(betaVec)
+sigMat <- matrix(0.1, ncol = p - 1, nrow = p - 1) +
+    diag(0.9, nrow = p - 1, ncol = p - 1)
+set.seed(1216)
+X <- cbind(1, MASS::mvrnorm(n = 1e5, mu = rep(0, p - 1), Sigma = sigMat))
+resVec <- rnorm(1e5)
+Y <- X %*% betaVec + resVec
+
+## fit linear model by `armaLm`
+armaLm(X, Y)
+```
+
+## Performance Comparison with `lm.fit`
+
+We compare the computing performance of `armaLm` with `lm.fit` from package
+**stats** with the help of package **microbenchmark** over the simulated
+`Y` and `X` as follows:
+
+```{r perf, echo = TRUE, cache = TRUE}
+library(microbenchmark)
+microbenchmark(lm.fit(X, Y), armaLm(X, Y), times = 100)
+```
+
+From the comparison, we may find that `armaLm` runs faster than `lm.fit`.
+
+# Reference
